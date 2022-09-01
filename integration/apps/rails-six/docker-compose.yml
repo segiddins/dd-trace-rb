@@ -36,6 +36,8 @@ services:
       - DD_DEMO_ENV_BUILD_PROFILING_EXTENSION=true
     expose:
       - "80"
+    ports:
+      - "80:80"
     stdin_open: true
     tty: true
     volumes:

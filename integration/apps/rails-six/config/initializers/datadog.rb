@@ -1,31 +1,22 @@
-require 'datadog/statsd'
+# require 'datadog/statsd'
 require 'ddtrace'
-require 'datadog/appsec'
+# require 'datadog/appsec'
+
+require 'opentracing'
+require 'datadog/tracing'
+require 'datadog/opentracer'
+
+
+# Activate the Datadog tracer for OpenTracing
+OpenTracing.global_tracer = Datadog::OpenTracer::Tracer.new(
+  enabled: true,
+  default_service: "my-service"
+)
 
 Datadog.configure do |c|
-  c.env = 'integration'
-  c.service = 'acme-rails-six'
-  c.diagnostics.debug = true if Datadog::DemoEnv.feature?('debug')
-  c.runtime_metrics.enabled = true if Datadog::DemoEnv.feature?('runtime_metrics')
+  c.diagnostics.debug = true #if Datadog::DemoEnv.feature?('debug')
 
-  if Datadog::DemoEnv.feature?('tracing')
-    c.tracing.analytics.enabled = true if Datadog::DemoEnv.feature?('analytics')
-
-    c.tracing.instrument :rails
-    c.tracing.instrument :redis, service_name: 'acme-redis'
-    c.tracing.instrument :resque
-  end
-
-  if Datadog::DemoEnv.feature?('appsec')
-    c.appsec.enabled = true
-
-    c.appsec.instrument :rails
-  end
-
-  if Datadog::DemoEnv.feature?('profiling')
-    if Datadog::DemoEnv.feature?('pprof_to_file')
-      # Reconfigure transport to write pprof to file
-      c.profiling.exporter.transport = Datadog::DemoEnv.profiler_file_transport
-    end
-  end
+  # c.tracing.instrument :faraday
+  # c.tracing.instrument :http
+  c.tracing.instrument :rails
 end
