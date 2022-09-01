@@ -18,5 +18,5 @@ Datadog.configure do |c|
 
   # c.tracing.instrument :faraday
   # c.tracing.instrument :http
-  c.tracing.instrument :rails
+  # c.tracing.instrument :rails
 end
