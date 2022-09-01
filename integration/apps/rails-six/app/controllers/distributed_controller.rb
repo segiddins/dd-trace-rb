@@ -13,7 +13,9 @@ class DistributedController < ApplicationController
   end
 
   def intermediate
-    OpenTracing.start_active_span('intermediate.span') do |scope|
+    extracted_ctx = OpenTracing.extract(OpenTracing::FORMAT_RACK, request.env)
+
+    OpenTracing.start_active_span('intermediate.span', child_of: extracted_ctx) do |scope|
       span = scope.span
       headers = {}
       OpenTracing.inject(span.context, OpenTracing::FORMAT_RACK, headers)
@@ -26,7 +28,9 @@ class DistributedController < ApplicationController
   end
 
   def destination
-    OpenTracing.start_active_span('destination.span') do |scope|
+    extracted_ctx = OpenTracing.extract(OpenTracing::FORMAT_RACK, request.env)
+
+    OpenTracing.start_active_span('destination.span', child_of: extracted_ctx) do |scope|
       span = scope.span
       headers = {}
       OpenTracing.inject(span.context, OpenTracing::FORMAT_RACK, headers)
