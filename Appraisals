@@ -1464,7 +1464,7 @@ elsif ruby_version?('3.0') || ruby_version?('3.1')
     gem 'rack-contrib'
     gem 'rack-test'
     gem 'rake', '>= 12.3'
-    gem 'redis', '< 4.0'
+    gem 'redis', '~> 4'
     gem 'rest-client'
     gem 'resque'
     gem 'ruby-kafka', '>= 0.7.10'
@@ -1472,7 +1472,7 @@ elsif ruby_version?('3.0') || ruby_version?('3.1')
     gem 'semantic_logger', '~> 4.0'
     gem 'sequel'
     gem 'shoryuken'
-    gem 'sidekiq'
+    gem 'sidekiq', '~> 6'
     gem 'sneakers', '>= 2.12.0'
     gem 'sqlite3', '>= 1.4.2', platform: :ruby
     gem 'jdbc-sqlite3', '>= 3.28', platform: :jruby
