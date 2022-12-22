@@ -1694,10 +1694,10 @@ PLATFORMS
   x86_64-linux
 
 DEPENDENCIES
-  actionpack (~> 7)
-  actionview (~> 7)
+  actionpack
+  actionview
   active_model_serializers (>= 0.10.0)
-  activerecord (~> 7)
+  activerecord
   activerecord-jdbcmysql-adapter
   activerecord-jdbcpostgresql-adapter
   addressable (~> 2.4.0)
