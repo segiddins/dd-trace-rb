@@ -1431,7 +1431,7 @@ elsif ruby_version?('3.0') || ruby_version?('3.1')
   end
 
   appraise 'rails61-postgres' do
-    gem 'rails', '~> 6.1.0'
+    gem 'railsrail', '~> 6.1.0'
     gem 'pg', '>= 1.1', platform: :ruby
     gem 'activerecord-jdbcpostgresql-adapter', platform: :jruby
     gem 'sprockets', '< 4'
