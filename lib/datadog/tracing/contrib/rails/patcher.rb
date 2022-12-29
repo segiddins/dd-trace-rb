@@ -117,7 +117,12 @@ module Datadog
           end
 
           def patch_rails_runner
-            ::Rails::Command::RunnerCommand.prepend(Runner)
+            # require 'rails/command/base'
+            # require 'rails/commands/runner/runner_command'
+
+            # require "rails/command"
+            # ::Rails::Command::RunnerCommand.prepend(Runner) if defined?(::Rails::Command::RunnerCommand)
+            ::Rails::Command.singleton_class.prepend(Command) if defined?(::Rails::Command)
           end
         end
       end

@@ -108,3 +108,4 @@ gem 'activerecord-jdbcpostgresql-adapter', platform: :jruby
 gem 'sprockets', '< 4'
 gem 'lograge', '~> 0.11'
 gem 'net-smtp'
+gem 'mysql2'
