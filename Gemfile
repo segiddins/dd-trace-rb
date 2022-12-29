@@ -102,10 +102,12 @@ group :check do
   end
 end
 
-gem 'rails', '~> 6.1.0'
-gem 'pg', '>= 1.1', platform: :ruby
-gem 'activerecord-jdbcpostgresql-adapter', platform: :jruby
-gem 'sprockets', '< 4'
-gem 'lograge', '~> 0.11'
-gem 'net-smtp'
-gem 'mysql2'
+unless ENV.key?('CI')
+  gem 'rails', '~> 6.1.0'
+  gem 'pg', '>= 1.1', platform: :ruby
+  gem 'activerecord-jdbcpostgresql-adapter', platform: :jruby
+  gem 'sprockets', '< 4'
+  gem 'lograge', '~> 0.11'
+  gem 'net-smtp'
+  gem 'mysql2'
+end
