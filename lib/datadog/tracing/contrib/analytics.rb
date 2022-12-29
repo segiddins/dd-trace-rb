@@ -12,9 +12,7 @@ module Datadog
 
         # Applies Analytics sampling rate, if applicable for this Contrib::Configuration.
         def set_rate!(span, configuration)
-          if enabled?(configuration[:analytics_enabled])
-            set_sample_rate(span, configuration[:analytics_sample_rate])
-          end
+          set_sample_rate(span, configuration[:analytics_sample_rate]) if enabled?(configuration[:analytics_enabled])
         end
 
         # Checks whether analytics should be enabled.

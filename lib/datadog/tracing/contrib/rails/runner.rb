@@ -41,7 +41,12 @@ module Datadog
                 Tracing::Metadata::Ext::TAG_OPERATION => operation,
               }
             ) do |span|
-              span.set_tag(Ext::TAG_RUNNER_SOURCE, Datadog::Core::Utils.truncate(@dd_source, MAX_TAG_VALUE_SIZE)) if @dd_source
+              if @dd_source
+                span.set_tag(
+                  Ext::TAG_RUNNER_SOURCE,
+                  Datadog::Core::Utils.truncate(@dd_source, MAX_TAG_VALUE_SIZE)
+                )
+              end
               Contrib::Analytics.set_rate!(span, Datadog.configuration.tracing[:rails])
 
               super
@@ -50,7 +55,12 @@ module Datadog
 
           # Capture executed source code when provided from STDIN.
           def eval(*args)
-            Datadog::Tracing.active_span.set_tag(Ext::TAG_RUNNER_SOURCE, Datadog::Core::Utils.truncate(args[0], MAX_TAG_VALUE_SIZE)) unless @dd_source
+            unless @dd_source
+              Datadog::Tracing.active_span.set_tag(
+                Ext::TAG_RUNNER_SOURCE,
+                Datadog::Core::Utils.truncate(args[0], MAX_TAG_VALUE_SIZE)
+              )
+            end
 
             super
           end

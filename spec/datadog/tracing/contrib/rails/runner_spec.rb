@@ -6,8 +6,6 @@ require_relative '../analytics_examples'
 RSpec.describe Datadog::Tracing::Contrib::Rails::Runner do
   include_context 'Rails test application'
 
-  before { app }
-
   subject(:run) { ::Rails::Command.invoke 'runner', argv }
   let(:argv) { [input] }
   let(:input) {}
@@ -23,11 +21,13 @@ RSpec.describe Datadog::Tracing::Contrib::Rails::Runner do
     Datadog.configure do |c|
       c.tracing.instrument :rails, **configuration_options
     end
+
+    app
   end
 
   shared_context 'with a custom service name' do
     context 'with a custom service name' do
-      let(:configuration_options) { { runner_service_name: 'runner-name'} }
+      let(:configuration_options) { { runner_service_name: 'runner-name' } }
 
       it 'sets the span service name' do
         run
