@@ -87,11 +87,13 @@ RSpec.describe Datadog::Tracing::Contrib::Rails::Runner do
 
   context 'from STDIN' do
     around do |example|
-      stdin = $stdin
-      $stdin = StringIO.new(source)
-      example.run
-    ensure
-      $stdin = stdin
+      begin
+        stdin = $stdin
+        $stdin = StringIO.new(source)
+        example.run
+      ensure
+        $stdin = stdin
+      end
     end
 
     let(:input) { '-' }
