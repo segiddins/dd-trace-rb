@@ -12,8 +12,8 @@ Datadog.configure do |c|
     c.tracing.analytics.enabled = true if Datadog::DemoEnv.feature?('analytics')
 
     c.tracing.instrument :rails
-    c.tracing.instrument :redis, service_name: 'acme-redis'
-    c.tracing.instrument :resque
+    c.tracing.instrument :graphql, schemas: [AcmeSchema], service_name: 'acme-graphql'
+
   end
 
   if Datadog::DemoEnv.feature?('appsec')

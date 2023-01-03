@@ -4,7 +4,7 @@ services:
     build:
       context: .
       args:
-        BASE_IMAGE: datadog/dd-apm-demo:rb-2.7
+        BASE_IMAGE: datadog/dd-apm-demo:rb-3.0
     depends_on:
       - ddagent
       - mysql
@@ -19,23 +19,25 @@ services:
       - DD_TRACE_AGENT_PORT=8126
       - DD_HEALTH_METRICS_ENABLED=true
       - DD_SERVICE=acme-rails-six
-      - DD_PROFILING_ENABLED=true
+      - DD_PROFILING_ENABLED=false
       - RAILS_ENV=production
       - RAILS_LOG_TO_STDOUT=true
       - REDIS_URL=redis://redis:6379
       - SECRET_KEY_BASE=5ced2602472cdf650e2cfa5be40c7d0dffd4e1da1483e21fa9c776e338b363c8bf75144bc6e6c5177a0d7a208a899552f98b3f82d4ea74cf5f9b9d3accbb1537
       # Use these to choose what is run
       - DD_DEMO_ENV_PROCESS=puma
-      - DD_DEMO_ENV_FEATURES=tracing,profiling,runtime_metrics
+      - DD_DEMO_ENV_FEATURES=tracing,runtime_metrics
       # Use this for a local version of ddtrace
       - DD_DEMO_ENV_GEM_LOCAL_DDTRACE=/vendor/dd-trace-rb
       # Use these for a specific revision of ddtrace
       # - DD_DEMO_ENV_GEM_GIT_DDTRACE=https://github.com/DataDog/dd-trace-rb.git
       # - DD_DEMO_ENV_GEM_REF_DDTRACE=f233336994315bfa04dac581387a8152bab8b85a
       # Enable building the profiling native extension
-      - DD_DEMO_ENV_BUILD_PROFILING_EXTENSION=true
+      - DD_DEMO_ENV_BUILD_PROFILING_EXTENSION=false
     expose:
       - "80"
+    ports:
+      - "80:80"
     stdin_open: true
     tty: true
     volumes:
@@ -91,18 +93,18 @@ services:
     image: redis:3.2
     expose:
       - "6379"
-  load-tester:
-    image: datadog/dd-apm-demo:wrk
-    command: -t10 -c10 -d43200s -s /scripts/scenarios/basic/default.lua http://app/basic/default
-    depends_on:
-      - app
-    environment:
-      - HEALTH_CHECK_URL=http://app/health
-      - HEALTH_CHECK_INTERVAL=1
-      - HEALTH_CHECK_MAX_ATTEMPTS=60
-    volumes:
-      - ./data/wrk:/data
-      - ../../images/wrk/scripts:/scripts
+  # load-tester:
+  #   image: datadog/dd-apm-demo:wrk
+  #   command: -t10 -c10 -d43200s -s /scripts/scenarios/basic/default.lua http://app/basic/default
+  #   depends_on:
+  #     - app
+  #   environment:
+  #     - HEALTH_CHECK_URL=http://app/health
+  #     - HEALTH_CHECK_INTERVAL=1
+  #     - HEALTH_CHECK_MAX_ATTEMPTS=60
+  #   volumes:
+  #     - ./data/wrk:/data
+  #     - ../../images/wrk/scripts:/scripts
 volumes:
   bundle:
   logs:

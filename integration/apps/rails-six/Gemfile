@@ -28,6 +28,7 @@ gem 'unicorn'
 
 # Choose correct specs for 'ddtrace' demo environment
 gem 'ddtrace', *Datadog::DemoEnv.gem_spec('ddtrace')
+gem 'graphql', '= 2.0.16'
 
 gem 'dogstatsd-ruby'
 gem 'ffi'

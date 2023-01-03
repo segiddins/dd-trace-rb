@@ -1496,7 +1496,7 @@ elsif ruby_version?('3.0') || ruby_version?('3.1')
     gem 'ethon'
     gem 'excon'
     gem 'grape'
-    gem 'graphql', '>= 2.0'
+    gem 'graphql', '= 2.0.16'
     gem 'grpc', '>= 1.38.0', platform: :ruby # Minimum version with Ruby 3.0 support
     gem 'http'
     gem 'httpclient'

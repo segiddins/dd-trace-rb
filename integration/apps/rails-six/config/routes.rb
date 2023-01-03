@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  post "/graphql", to: "graphql#execute"
   get '/', to: 'basic#default'
   get 'health', to: 'health#check'
   get 'health/detailed', to: 'health#detailed_check'
