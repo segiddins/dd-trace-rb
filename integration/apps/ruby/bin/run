@@ -3,8 +3,9 @@
 # Start application process
 puts "\n== Starting application process =="
 
-profiling = Datadog::DemoEnv.feature?('profiling') ? 'DD_PROFILING_ENABLED=true ddtracerb exec ' : ''
-process = (ARGV[0] || Datadog::DemoEnv.process)
+# profiling = Datadog::DemoEnv.feature?('profiling') ? 'DD_PROFILING_ENABLED=true ddtracerb exec ' : ''
+# process = (ARGV[0] || Datadog::DemoEnv.process)
+process = 'fibonacci'
 command = case process
           when 'fibonacci'
             'bundle exec ruby app/fibonacci.rb'

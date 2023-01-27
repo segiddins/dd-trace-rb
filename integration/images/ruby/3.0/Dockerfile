@@ -44,7 +44,7 @@ RUN gem update --system 3.4.1
 RUN mkdir -p "$GEM_HOME" && chmod -R 777 "$GEM_HOME"
 
 # Upgrade RubyGems and Bundler
-RUN gem update --system 3.4.1
+# RUN gem update --system 3.4.1
 RUN gem install bundler
 ENV BUNDLE_SILENCE_ROOT_WARNING 1
 
