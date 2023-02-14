@@ -6,3 +6,4 @@
 --ignore=/vendor/bundle
 --ignore=/lib/datadog/appsec
 --ignore=/tmp
+--ignore=/spec/datadog/tracing/contrib/grpc/support/gen
