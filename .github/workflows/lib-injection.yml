@@ -39,6 +39,8 @@ jobs:
           - dd-lib-ruby-init-test-rails
           - dd-lib-ruby-init-test-rails-explicit
           - dd-lib-ruby-init-test-rails-gemsrb
+          - dd-lib-ruby-init-test-rails-conflict
+          - dd-lib-ruby-init-test-rails-bundle-deploy
       fail-fast: false
     env:
       TEST_LIBRARY: ruby
