@@ -6,6 +6,7 @@ require_relative '../runtime/metrics'
 require_relative '../telemetry/client'
 require_relative '../workers/runtime_metrics'
 
+require_relative '../remote/component'
 require_relative '../../tracing/component'
 require_relative '../../profiling/component'
 require_relative '../../appsec/component'
@@ -17,7 +18,6 @@ module Datadog
       class Components
         class << self
           include Datadog::Tracing::Component
-          include Datadog::Profiling::Component
 
           def build_health_metrics(settings)
             settings = settings.diagnostics.health_metrics
@@ -60,6 +60,7 @@ module Datadog
         attr_reader \
           :health_metrics,
           :logger,
+          :remote,
           :profiler,
           :runtime_metrics,
           :telemetry,
@@ -67,28 +68,21 @@ module Datadog
           :appsec
 
         def initialize(settings)
-          # Logger
           @logger = self.class.build_logger(settings)
 
           agent_settings = AgentSettingsResolver.call(settings, logger: @logger)
 
-          # Tracer
+          @remote = Remote::Component.build(settings, agent_settings)
           @tracer = self.class.build_tracer(settings, agent_settings)
-
-          # Profiler
-          @profiler = self.class.build_profiler(settings, agent_settings, @tracer)
-
-          # Runtime metrics
+          @profiler = Datadog::Profiling::Component.build_profiler_component(
+            settings: settings,
+            agent_settings: agent_settings,
+            optional_tracer: @tracer,
+          )
           @runtime_metrics = self.class.build_runtime_metrics_worker(settings)
-
-          # Health metrics
           @health_metrics = self.class.build_health_metrics(settings)
-
-          # Telemetry
           @telemetry = self.class.build_telemetry(settings)
-
-          # AppSec
-          @appsec = Datadog::AppSec::Component.build_appsec_component(settings.appsec)
+          @appsec = Datadog::AppSec::Component.build_appsec_component(settings)
         end
 
         # Starts up components
@@ -111,6 +105,9 @@ module Datadog
         # If it has another instance to compare to, it will compare
         # and avoid tearing down parts still in use.
         def shutdown!(replacement = nil)
+          # Shutdown remote configuration
+          remote.shutdown! if remote
+
           # Decommission AppSec
           appsec.shutdown! if appsec
 

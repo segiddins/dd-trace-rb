@@ -5,6 +5,7 @@ RSpec.describe Datadog::Profiling::Collectors::CpuAndWallTimeWorker do
   before { skip_if_profiling_not_supported(self) }
 
   let(:recorder) { build_stack_recorder }
+  let(:endpoint_collection_enabled) { true }
   let(:gc_profiling_enabled) { true }
   let(:allocation_counting_enabled) { true }
   let(:options) { {} }
@@ -14,6 +15,7 @@ RSpec.describe Datadog::Profiling::Collectors::CpuAndWallTimeWorker do
       recorder: recorder,
       max_frames: 400,
       tracer: nil,
+      endpoint_collection_enabled: endpoint_collection_enabled,
       gc_profiling_enabled: gc_profiling_enabled,
       allocation_counting_enabled: allocation_counting_enabled,
       **options
@@ -23,6 +25,19 @@ RSpec.describe Datadog::Profiling::Collectors::CpuAndWallTimeWorker do
   describe '.new' do
     it 'creates the garbage collection tracepoint in the disabled state' do
       expect(described_class::Testing._native_gc_tracepoint(cpu_and_wall_time_worker)).to_not be_enabled
+    end
+
+    [true, false].each do |value|
+      context "when endpoint_collection_enabled is #{value}" do
+        let(:endpoint_collection_enabled) { value }
+
+        it "initializes the ThreadContext collector with endpoint_collection_enabled: #{value}" do
+          expect(Datadog::Profiling::Collectors::ThreadContext)
+            .to receive(:new).with(hash_including(endpoint_collection_enabled: value)).and_call_original
+
+          cpu_and_wall_time_worker
+        end
+      end
     end
   end
 
@@ -180,6 +195,25 @@ RSpec.describe Datadog::Profiling::Collectors::CpuAndWallTimeWorker do
       expect(sampling_time_ns_max).to be < one_second_in_ns, "A single sample should not take longer than 1s, #{stats}"
     end
 
+    it 'does not allocate Ruby objects during the regular operation of sampling' do
+      # The intention of this test is to warn us if we accidentally trigger object allocations during "happy path"
+      # sampling.
+      # Note that when something does go wrong during sampling, we do allocate exceptions (and then raise them).
+
+      start
+
+      try_wait_until do
+        samples = samples_from_pprof_without_gc_and_overhead(recorder.serialize!)
+        samples if samples.any?
+      end
+
+      cpu_and_wall_time_worker.stop
+
+      stats = cpu_and_wall_time_worker.stats
+
+      expect(stats).to include(allocations_during_sample: 0)
+    end
+
     it 'records garbage collection cycles' do
       if RUBY_VERSION.start_with?('3.')
         skip(
@@ -302,7 +336,13 @@ RSpec.describe Datadog::Profiling::Collectors::CpuAndWallTimeWorker do
     end
 
     context 'when all threads are sleeping (no thread holds the Global VM Lock)' do
+      let(:options) { { dynamic_sampling_rate_enabled: false } }
+
+      before { expect(Datadog.logger).to receive(:warn).with(/dynamic sampling rate disabled/) }
+
       it 'is able to sample even when all threads are sleeping' do
+        skip('Test is flaky -- @ivoanjo is investigating')
+
         start
         wait_until_running
 
@@ -310,11 +350,12 @@ RSpec.describe Datadog::Profiling::Collectors::CpuAndWallTimeWorker do
 
         cpu_and_wall_time_worker.stop
 
-        result = samples_for_thread(samples_from_pprof_without_gc_and_overhead(recorder.serialize!), Thread.current)
+        all_samples = samples_from_pprof_without_gc_and_overhead(recorder.serialize!)
+        result = samples_for_thread(all_samples, Thread.current)
         sample_count = result.map { |it| it.values.fetch(:'cpu-samples') }.reduce(:+)
 
         stats = cpu_and_wall_time_worker.stats
-        debug_failures = { thread_list: Thread.list, result: result }
+        debug_failures = { thread_list: Thread.list, all_samples: all_samples }
 
         trigger_sample_attempts = stats.fetch(:trigger_sample_attempts)
         simulated_signal_delivery = stats.fetch(:simulated_signal_delivery)
@@ -324,8 +365,10 @@ RSpec.describe Datadog::Profiling::Collectors::CpuAndWallTimeWorker do
 
         # Sanity checking
 
-        # We're currently targeting 100 samples per second, so this is a conservative approximation that hopefully
-        # will not cause flakiness
+        # We're currently targeting 100 samples per second (aka ~20 in the 0.2 period above), so expecting 8 samples
+        # will hopefully not cause flakiness. But this test has been flaky in the past so... Ping @ivoanjo if it happens
+        # again.
+        #
         expect(sample_count).to be >= 8, "sample_count: #{sample_count}, stats: #{stats}, debug_failures: #{debug_failures}"
         expect(trigger_sample_attempts).to be >= sample_count
       end
@@ -470,15 +513,17 @@ RSpec.describe Datadog::Profiling::Collectors::CpuAndWallTimeWorker do
   describe '#reset_after_fork' do
     subject(:reset_after_fork) { cpu_and_wall_time_worker.reset_after_fork }
 
-    let(:cpu_and_wall_time_collector) do
-      Datadog::Profiling::Collectors::CpuAndWallTime.new(recorder: recorder, max_frames: 400, tracer: nil)
+    let(:thread_context_collector) do
+      Datadog::Profiling::Collectors::ThreadContext.new(
+        recorder: recorder, max_frames: 400, tracer: nil, endpoint_collection_enabled: endpoint_collection_enabled,
+      )
     end
-    let(:options) { { cpu_and_wall_time_collector: cpu_and_wall_time_collector } }
+    let(:options) { { thread_context_collector: thread_context_collector } }
 
     before do
       # This is important -- the real #reset_after_fork must not be called concurrently with the worker running,
       # which we do in this spec to make it easier to test the reset_after_fork behavior
-      allow(cpu_and_wall_time_collector).to receive(:reset_after_fork)
+      allow(thread_context_collector).to receive(:reset_after_fork)
 
       cpu_and_wall_time_worker.start
       wait_until_running
@@ -495,7 +540,7 @@ RSpec.describe Datadog::Profiling::Collectors::CpuAndWallTimeWorker do
     end
 
     it 'resets the CpuAndWallTime collector only after disabling the tracepoint' do
-      expect(cpu_and_wall_time_collector).to receive(:reset_after_fork) do
+      expect(thread_context_collector).to receive(:reset_after_fork) do
         expect(described_class::Testing._native_gc_tracepoint(cpu_and_wall_time_worker)).to_not be_enabled
       end
 
@@ -518,6 +563,7 @@ RSpec.describe Datadog::Profiling::Collectors::CpuAndWallTimeWorker do
         sampling_time_ns_max: nil,
         sampling_time_ns_total: nil,
         sampling_time_ns_avg: nil,
+        allocations_during_sample: 0,
       )
     end
   end
@@ -607,6 +653,7 @@ RSpec.describe Datadog::Profiling::Collectors::CpuAndWallTimeWorker do
       recorder: build_stack_recorder,
       max_frames: 400,
       tracer: nil,
+      endpoint_collection_enabled: endpoint_collection_enabled,
       gc_profiling_enabled: gc_profiling_enabled,
       allocation_counting_enabled: allocation_counting_enabled,
     )

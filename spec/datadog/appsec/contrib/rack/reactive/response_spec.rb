@@ -1,30 +1,40 @@
 # frozen_string_literal: true
 
 require 'datadog/appsec/spec_helper'
+require 'datadog/appsec/processor'
 require 'datadog/appsec/reactive/operation'
+require 'datadog/appsec/contrib/rack/gateway/response'
 require 'datadog/appsec/contrib/rack/reactive/response'
-require 'rack'
 
 RSpec.describe Datadog::AppSec::Contrib::Rack::Reactive::Response do
   let(:operation) { Datadog::AppSec::Reactive::Operation.new('test') }
+  let(:waf_context) { instance_double(Datadog::AppSec::Processor::Context) }
+
   let(:response) do
-    Rack::Response.new
+    Datadog::AppSec::Contrib::Rack::Gateway::Response.new(
+      'Ok',
+      200,
+      { 'content-type' => 'text/html', 'set-cookie' => 'foo' },
+      active_context: waf_context,
+    )
   end
 
   describe '.publish' do
     it 'propagates response attributes to the operation' do
       expect(operation).to receive(:publish).with('response.status', 200)
+      expect(operation).to receive(:publish).with(
+        'response.headers',
+        { 'content-type' => 'text/html', 'set-cookie' => 'foo' },
+      )
 
       described_class.publish(operation, response)
     end
   end
 
   describe '.subscribe' do
-    let(:waf_context) { double(:waf_context) }
-
     context 'not all addresses have been published' do
       it 'does not call the waf context' do
-        expect(operation).to receive(:subscribe).with('response.status').and_call_original
+        expect(operation).to receive(:subscribe).with('response.status', 'response.headers').and_call_original
         expect(waf_context).to_not receive(:run)
         described_class.subscribe(operation, waf_context)
       end
@@ -34,7 +44,16 @@ RSpec.describe Datadog::AppSec::Contrib::Rack::Reactive::Response do
       it 'does call the waf context with the right arguments' do
         expect(operation).to receive(:subscribe).and_call_original
 
-        expected_waf_arguments = { 'server.response.status' => '200' }
+        expected_waf_arguments = {
+          'server.response.status' => '200',
+          'server.response.headers' => {
+            'content-type' => 'text/html',
+            'set-cookie' => 'foo',
+          },
+          'server.response.headers.no_cookies' => {
+            'content-type' => 'text/html',
+          }
+        }
 
         waf_result = double(:waf_result, status: :ok, timeout: false)
         expect(waf_context).to receive(:run).with(

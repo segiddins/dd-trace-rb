@@ -113,6 +113,7 @@ module Datadog
 
     private_class_method def self.protobuf_already_loaded?
       defined?(::Google::Protobuf) && !defined?(::Protobuf)
+      !!(defined?(::Google::Protobuf) && !defined?(::Protobuf))
     end
 
     private_class_method def self.protobuf_failed_to_load?
@@ -140,7 +141,7 @@ module Datadog
         # NOTE: We use Kernel#warn here because this code gets run BEFORE Datadog.logger is actually set up.
         # In the future it'd be nice to shuffle the logger startup to happen first to avoid this special case.
         Kernel.warn(
-          '[DDTRACE] Error while loading google-protobuf gem. ' \
+          '[ddtrace] Error while loading google-protobuf gem. ' \
           "Cause: '#{e.class.name} #{e.message}' Location: '#{Array(e.backtrace).first}'. " \
           'This can happen when google-protobuf is missing its native components. ' \
           'To fix this, try removing and reinstalling the gem, forcing it to recompile the components: ' \
@@ -157,7 +158,7 @@ module Datadog
       unless success
         if exception
           'There was an error loading the profiling native extension due to ' \
-          "'#{exception.class.name} #{exception.message}' at '#{exception.backtrace.first}'"
+          "'#{exception.class.name} #{exception.message}' at '#{Array(exception.backtrace).first}'"
         else
           'The profiling native extension did not load correctly. ' \
           'For help solving this issue, please contact Datadog support at <https://docs.datadoghq.com/help/>.' \
@@ -182,12 +183,12 @@ module Datadog
 
       require_relative 'profiling/ext/forking'
       require_relative 'profiling/collectors/code_provenance'
-      require_relative 'profiling/collectors/cpu_and_wall_time'
       require_relative 'profiling/collectors/cpu_and_wall_time_worker'
       require_relative 'profiling/collectors/dynamic_sampling_rate'
       require_relative 'profiling/collectors/idle_sampling_helper'
       require_relative 'profiling/collectors/old_stack'
       require_relative 'profiling/collectors/stack'
+      require_relative 'profiling/collectors/thread_context'
       require_relative 'profiling/stack_recorder'
       require_relative 'profiling/old_recorder'
       require_relative 'profiling/exporter'

@@ -158,6 +158,7 @@ namespace :spec do
     :rake,
     :redis,
     :resque,
+    :roda,
     :rest_client,
     :semantic_logger,
     :sequel,
@@ -314,6 +315,7 @@ task :ci do
   declare '✅ 2.1 / ✅ 2.2 / ✅ 2.3 / ✅ 2.4 / ✅ 2.5 / ✅ 2.6 / ✅ 2.7 / ✅ 3.0 / ✅ 3.1 / ✅ 3.2 / ✅ jruby' => 'bundle exec appraisal contrib rake spec:rake'
   declare '✅ 2.1 / ✅ 2.2 / ✅ 2.3 / ✅ 2.4 / ✅ 2.5 / ✅ 2.6 / ✅ 2.7 / ✅ 3.0 / ✅ 3.1 / ✅ 3.2 / ✅ jruby' => 'bundle exec appraisal contrib rake spec:resque'
   declare '✅ 2.1 / ✅ 2.2 / ✅ 2.3 / ✅ 2.4 / ✅ 2.5 / ✅ 2.6 / ✅ 2.7 / ✅ 3.0 / ✅ 3.1 / ✅ 3.2 / ✅ jruby' => 'bundle exec appraisal contrib rake spec:rest_client'
+  declare '✅ 2.1 / ✅ 2.2 / ✅ 2.3 / ✅ 2.4 / ✅ 2.5 / ✅ 2.6 / ✅ 2.7 / ✅ 3.0 / ✅ 3.1 / ✅ 3.2 / ✅ jruby' => 'bundle exec appraisal contrib rake spec:roda'
   declare '✅ 2.1 / ✅ 2.2 / ✅ 2.3 / ✅ 2.4 / ✅ 2.5 / ✅ 2.6 / ✅ 2.7 / ✅ 3.0 / ✅ 3.1 / ✅ 3.2 / ✅ jruby' => 'bundle exec appraisal contrib rake spec:rspec'
   declare '✅ 2.1 / ✅ 2.2 / ✅ 2.3 / ✅ 2.4 / ✅ 2.5 / ✅ 2.6 / ✅ 2.7 / ✅ 3.0 / ✅ 3.1 / ✅ 3.2 / ✅ jruby' => 'bundle exec appraisal contrib rake spec:semantic_logger'
   declare '✅ 2.1 / ✅ 2.2 / ✅ 2.3 / ✅ 2.4 / ✅ 2.5 / ✅ 2.6 / ✅ 2.7 / ✅ 3.0 / ✅ 3.1 / ✅ 3.2 / ✅ jruby' => 'bundle exec appraisal contrib rake spec:sequel'
@@ -467,8 +469,39 @@ Rake::ExtensionTask.new("ddtrace_profiling_loader.#{RUBY_VERSION}_#{RUBY_PLATFOR
   ext.ext_dir = 'ext/ddtrace_profiling_loader'
 end
 
+desc 'Runs the steep type checker on the codebase'
+task :typecheck do
+  if Gem::Version.new(RUBY_VERSION) < Gem::Version.new('2.7.0')
+    $stderr.puts 'Sorry, cannot run sorbet type checker on older rubies :(' # rubocop:disable Style/StderrPuts
+  else
+    begin
+      sh 'steep check'
+    rescue
+      $stderr.puts( # rubocop:disable Style/StderrPuts
+        %(
++------------------------------------------------------------------------------+
+|  **Hello there, fellow contributor who just triggered a Steep type error**   |
+|                                                                              |
+| We're still experimenting with Steep on this codebase. If possible, take a   |
+| stab at getting it to work; you'll find a guide under                        |
+| docs/StaticTypingGuide.md for how to use it.                                 |
+|                                                                              |
+| Feel free to unblock yourself by ignoring any files that triggered           |
+| issues by changing the `Steepfile` (you'll find a lot of ignores there       |
+| already).                                                                    |
+|                                                                              |
+| Also, if this is too annoying for you -- let us know! We definitely are      |
+| still improving how we use the tool.                                         |
++------------------------------------------------------------------------------+
+)
+      )
+      raise
+    end
+  end
+end
+
 desc 'Runs rubocop + main test suite'
-task default: ['rubocop', 'spec:main']
+task default: ['rubocop', 'typecheck', 'spec:main']
 
 desc 'Runs the default task in parallel'
-multitask fastdefault: ['rubocop', 'spec:main']
+multitask fastdefault: ['rubocop', 'typecheck', 'spec:main']

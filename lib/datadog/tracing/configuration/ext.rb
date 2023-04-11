@@ -5,6 +5,14 @@ module Datadog
       # e.g. Env vars, default values, enums, etc...
       module Ext
         ENV_ENABLED = 'DD_TRACE_ENABLED'.freeze
+        ENV_TRACE_ID_128_BIT_GENERATION_ENABLED = 'DD_TRACE_128_BIT_TRACEID_GENERATION_ENABLED'.freeze
+
+        # @public_api
+        module SpanAttributeSchema
+          ENV_SPAN_ATTRIBUTE_SCHEMA = 'DD_TRACE_SPAN_ATTRIBUTE_SCHEMA'.freeze
+          DEFAULT_VERSION = 'v0'.freeze
+          VERSION_ONE = 'v1'.freeze
+        end
 
         # @public_api
         module Analytics
@@ -14,6 +22,7 @@ module Datadog
         # @public_api
         module Correlation
           ENV_LOGS_INJECTION_ENABLED = 'DD_LOGS_INJECTION'.freeze
+          ENV_TRACE_ID_128_BIT_LOGGING_ENABLED = 'DD_TRACE_128_BIT_TRACEID_LOGGING_ENABLED'.freeze
         end
 
         # @public_api

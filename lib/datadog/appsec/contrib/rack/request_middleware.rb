@@ -1,5 +1,7 @@
 require 'json'
 
+require_relative 'gateway/request'
+require_relative 'gateway/response'
 require_relative '../../ext'
 require_relative '../../instrumentation/gateway'
 require_relative '../../processor'
@@ -21,24 +23,37 @@ module Datadog
             @oneshot_tags_sent = false
           end
 
+          # rubocop:disable Metrics/AbcSize,Metrics/PerceivedComplexity,Metrics/CyclomaticComplexity,Metrics/MethodLength
           def call(env)
             return @app.call(env) unless Datadog::AppSec.enabled?
 
+            Datadog::Core::Remote.active_remote.barrier(:once) unless Datadog::Core::Remote.active_remote.nil?
             processor = Datadog::AppSec.processor
 
-            return @app.call(env) if processor.nil? || !processor.ready?
+            processor = nil
+            ready = false
+            context = nil
+
+            Datadog::AppSec.reconfigure_lock do
+              processor = Datadog::AppSec.processor
+
+              if !processor.nil? && processor.ready?
+                context = processor.activate_context
+                env['datadog.waf.context'] = context
+                ready = true
+              end
+            end
 
             # TODO: handle exceptions, except for @app.call
 
-            context = processor.activate_context
-            env['datadog.waf.context'] = context
+            return @app.call(env) unless ready
 
-            request = ::Rack::Request.new(env)
+            gateway_request = Gateway::Request.new(env)
 
             add_appsec_tags(processor, active_trace, active_span, env)
 
             request_return, request_response = catch(::Datadog::AppSec::Ext::INTERRUPT) do
-              Instrumentation.gateway.push('rack.request', request) do
+              Instrumentation.gateway.push('rack.request', gateway_request) do
                 @app.call(env)
               end
             end
@@ -47,16 +62,18 @@ module Datadog
               request_return = AppSec::Response.negotiate(env).to_rack
             end
 
-            response = ::Rack::Response.new(request_return[2], request_return[0], request_return[1])
-            response.instance_eval do
-              @waf_context = context
-            end
+            gateway_response = Gateway::Response.new(
+              request_return[2],
+              request_return[0],
+              request_return[1],
+              active_context: context
+            )
 
-            _response_return, response_response = Instrumentation.gateway.push('rack.response', response)
+            _response_return, response_response = Instrumentation.gateway.push('rack.response', gateway_response)
 
             context.events.each do |e|
-              e[:response] ||= response
-              e[:request]  ||= request
+              e[:response] ||= gateway_response
+              e[:request]  ||= gateway_request
             end
 
             AppSec::Event.record(*context.events)
@@ -72,6 +89,7 @@ module Datadog
               processor.deactivate_context
             end
           end
+          # rubocop:enable Metrics/AbcSize,Metrics/PerceivedComplexity,Metrics/CyclomaticComplexity,Metrics/MethodLength
 
           private
 
