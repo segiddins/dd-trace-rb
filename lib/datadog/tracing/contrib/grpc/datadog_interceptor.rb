@@ -12,6 +12,7 @@ module Datadog
           class Base < ::GRPC::Interceptor
             def initialize(options = {})
               super
+              @cache = Cache.new
               return unless block_given?
 
               # Set custom configuration on the interceptor if block is given
@@ -35,6 +36,10 @@ module Datadog
             def bidi_streamer(**keywords, &block)
               trace(keywords, &block)
             end
+
+            protected
+
+            attr_reader :cache
 
             private
 
@@ -92,6 +97,21 @@ module Datadog
                 else
                   add_getter!(option)
                 end
+              end
+            end
+
+            # Cache store for static formatter
+            class Cache
+              def initialize
+                @store = {}
+              end
+
+              def fetch(key)
+                value = @store[key]
+
+                return value if value
+
+                @store[key] = yield
               end
             end
           end

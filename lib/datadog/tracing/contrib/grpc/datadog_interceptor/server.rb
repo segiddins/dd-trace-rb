@@ -18,7 +18,11 @@ module Datadog
           # its tracing context with a parent client-side context
           class Server < Base
             def trace(keywords)
-              formatter = GRPC::Formatting::MethodObjectFormatter.new(keywords[:method])
+              ruby_grpc_method = keywords[:method]
+
+              formatter = cache.fetch(ruby_grpc_method.name) do
+                GRPC::Formatting::MethodObjectFormatter.new(ruby_grpc_method)
+              end
 
               options = {
                 span_type: Tracing::Metadata::Ext::HTTP::TYPE_INBOUND,

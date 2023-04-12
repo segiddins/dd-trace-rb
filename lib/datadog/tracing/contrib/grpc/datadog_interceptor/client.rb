@@ -17,7 +17,10 @@ module Datadog
           # sending the request to the server.
           class Client < Base
             def trace(keywords)
-              formatter = GRPC::Formatting::FullMethodStringFormatter.new(keywords[:method])
+              raw_grpc_method = keywords[:method]
+              formatter = cache.fetch(raw_grpc_method) do
+                GRPC::Formatting::FullMethodStringFormatter.new(raw_grpc_method)
+              end
 
               options = {
                 span_type: Tracing::Metadata::Ext::HTTP::TYPE_OUTBOUND,
