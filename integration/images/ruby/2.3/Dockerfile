@@ -1,5 +1,9 @@
 FROM ruby:2.3
 
+# Add Jessie repos
+# Fixes https://www.lucas-nussbaum.net/blog/?p=947
+RUN printf "deb http://archive.debian.org/debian/ jessie main\ndeb-src http://archive.debian.org/debian/ jessie main" > /etc/apt/sources.list
+
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Install prerequisites
