@@ -61,7 +61,7 @@ module SidekiqServerExpectations
 
       configure_sidekiq
 
-      t = Thread.new do
+      _t = Thread.new do
         cli = Sidekiq::CLI.instance
         cli.parse(['--require', app_tempfile.path]) # boot the "app"
         cli.run
@@ -69,9 +69,9 @@ module SidekiqServerExpectations
 
       try_wait_until(seconds: 10) { wait_until.call } if wait_until
 
-      Thread.kill(t)
-
       yield
+
+      Thread.main.kill
     end
   ensure
     app_tempfile.close
