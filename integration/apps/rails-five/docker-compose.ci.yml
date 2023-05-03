@@ -29,7 +29,6 @@ services:
       # Use these to choose what is run
       - DD_DEMO_ENV_PROCESS=puma
       - DD_DEMO_ENV_FEATURES=tracing,profiling
-      - DD_INSTRUMENTATION_TELEMETRY_ENABLED=true
     expose:
       - "80"
     stdin_open: true
