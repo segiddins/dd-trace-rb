@@ -17,6 +17,7 @@ services:
       - DD_AGENT_HOST=ddagent
       - DD_METRIC_AGENT_PORT=8125
       - DD_TRACE_AGENT_PORT=8126
+      - DD_TRACE_SCHEMA_FILE_PATH=/app/datadog-schema.yaml
       - DD_HEALTH_METRICS_ENABLED=true
       - DD_SERVICE=acme-rails-six
       - DD_PROFILING_ENABLED=true
@@ -26,7 +27,7 @@ services:
       - SECRET_KEY_BASE=5ced2602472cdf650e2cfa5be40c7d0dffd4e1da1483e21fa9c776e338b363c8bf75144bc6e6c5177a0d7a208a899552f98b3f82d4ea74cf5f9b9d3accbb1537
       # Use these to choose what is run
       - DD_DEMO_ENV_PROCESS=puma
-      - DD_DEMO_ENV_FEATURES=tracing,profiling,runtime_metrics
+      - DD_DEMO_ENV_FEATURES=tracing,profiling,runtime_metrics,schema
       # Use this for a local version of ddtrace
       - DD_DEMO_ENV_GEM_LOCAL_DDTRACE=/vendor/dd-trace-rb
       # Use these for a specific revision of ddtrace

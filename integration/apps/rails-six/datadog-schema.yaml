@@ -1,0 +1,118 @@
+meta:
+  format: 0.1
+  id: 'default'
+  version: '20230515'
+tracing:
+  spans:
+    # Rack instrumentation
+    rack.request:
+      sources:
+        start: 'rack.request.start'
+        finish: 'rack.request.finish'
+      attributes:
+        resource: '<finish:resource>'
+        service: '<finish:service>'
+        type: 'web'
+      tags:
+        component: rack
+        env: '<finish:env>'
+        http.base_url: '<finish:http.base_url>'
+        http.method: '<finish:http.method>'
+        http.path_group: '<finish:http.path_group>'
+        http.response.headers.content-type: '<finish:http.response.headers.content-type>'
+        http.response.headers.x-request-id: '<finish:http.response.headers.x-request-id>'
+        http.url: '<finish:http.url>'
+        http.url_details: '<finish:http.url_details.path>'
+        # http.useragent: '<finish:http.useragent>'
+        operation: 'request'
+        span.kind: 'server'
+      metrics:
+        http.status_code: '<finish:http.status_code>'
+    rails.action_controller:
+      sources:
+        start: 'rails.action_controller.start'
+        finish: 'rails.action_controller.finish'
+      attributes:
+        resource: '<finish:resource>'
+        service: '<finish:service>'
+        type: 'web'
+      tags:
+        component: 'action_pack'
+        env: '<finish:env>'
+        operation: 'controller'
+        rails.route.action: '<finish:rails.route.action>'
+        rails.route.controller: '<finish:rails.route.controller>'
+      metrics:
+    mysql2.query:
+      # NOTE: Start is different than finish
+      #       because span name changes.
+      #       May want to change this behavior...
+      sources:
+        start: 'active_record.sql.start'
+        finish: 'mysql2.query.finish'
+      attributes:
+        resource: '<finish:resource>'
+        service: '<finish:service>'
+        type: 'sql'
+      tags:
+        active_record.db.name: '<finish:active_record.db.name>'
+        component: 'active_record'
+        db.statement: '<finish:db.statement>'
+        db.system: '<finish:db.system>'
+        env: '<finish:env>'
+        network.destination.ip: <finish:network.destination.ip>
+        operation: 'sql'
+        peer.hostname: '<finish:peer.hostname>'
+        peer.service: '<finish:peer.service>'
+      metrics:
+        network.destination.port: <finish:network.destination.port>
+    active_record.instantiation:
+      sources:
+        start: 'active_record.instantiation.start'
+        finish: 'active_record.instantiation.finish'
+      attributes:
+        resource: '<finish:resource>'
+        service: '<finish:service>'
+        type: 'custom'
+      tags:
+        active_record.instantiation.class_name: '<finish:active_record.instantiation.class_name>'
+        component: 'active_record'
+        env: '<finish:env>'
+        operation: 'instantiation'
+      metrics:
+        active_record.instantiation.record_count: '<finish:active_record.instantiation.record_count>'
+    # resque.job:
+    #   sources:
+    #     start: 'resque.job.start'
+    #     finish: 'resque.job.finish'
+    #   attributes:
+    #     resource: '<finish:resource>'
+    #     service: '<finish:service>'
+    #   tags:
+    #     component: 'resque'
+    #     env: '<finish:env>'
+    #   metrics:
+    redis.command:
+      sources:
+        start: 'redis.command.start'
+        finish: 'redis.command.finish'
+      attributes:
+        resource: '<finish:resource>'
+        service: '<finish:service>'
+        type: 'redis'
+      tags:
+        component: 'redis'
+        db.statement: '<finish:db.statement>'
+        db.system: 'redis'
+        env: '<finish:env>'
+        network.destination.ip: <finish:network.destination.ip>
+        operation: 'command'
+        out.redis_db: <finish:out.redis_db>'
+        peer.hostname: '<finish:peer.hostname>'
+        peer.service: '<finish:peer.service>'
+        redis.raw_command: '<finish:resource>'
+        span.kind: 'client'
+      metrics:
+        db.redis.database_index: '<finish:db.redis.database_index>'
+        network.destination.port: <finish:network.destination.port>
+        redis.pipeline_length: '<finish:redis.pipeline_length>'

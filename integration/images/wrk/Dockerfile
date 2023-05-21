@@ -1,4 +1,4 @@
-FROM debian:jessie
+FROM debian:bullseye
 
 RUN echo "===> Installing  tools..."  && \
     apt-get -y update && \

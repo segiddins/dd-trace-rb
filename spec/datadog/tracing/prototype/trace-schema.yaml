@@ -1,0 +1,40 @@
+#
+# Based on existing span-based instrumentation
+#
+# Benefits:
+# - General visibility into what metadata populates each field
+# - Adding tags
+# - Modifying tags (with static values, or other tag values)
+# - Removing tags
+#
+# Limitations:
+# - Data must be a tag on the span at time of the snapshot
+# - No arbitrary interpolation (tokens only)
+#
+meta:
+  format: 0.1
+  id: 'default'
+  version: '20230515'
+tracing:
+  spans:
+    # Net::HTTP instrumentation
+    http.request:
+      sources:
+        start: 'http.request.start'
+        finish: 'http.request.finish'
+      attributes:
+        resource: '<finish:resource>'
+        service: '<finish:service>'
+        type: 'http'
+      tags:
+        component: 'net/http'
+        http.method: '<finish:http.method>'
+        http.url: '<finish:http.url>'
+        operation: 'request'
+        out.host: '<finish:out.host>'
+        peer.hostname: '<finish:peer.hostname>'
+        peer.service: '<finish:peer.service>'
+        span.kind: 'client'
+      metrics:
+        http.status_code: '<finish:http.status_code>'
+        out.port: '<finish:out.port>'

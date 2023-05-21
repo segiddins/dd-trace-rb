@@ -2,6 +2,8 @@ require 'datadog/statsd'
 require 'ddtrace'
 require 'datadog/appsec'
 
+require 'datadog/tracing/prototype/snapshots' if Datadog::DemoEnv.feature?('schema')
+
 Datadog.configure do |c|
   c.env = 'integration'
   c.service = 'acme-rails-six'

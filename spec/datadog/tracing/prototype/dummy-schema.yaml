@@ -1,0 +1,55 @@
+#
+# Based on existing span-based instrumentation
+#
+# Benefits:
+# - General visibility into what metadata populates each field
+# - Adding tags
+# - Modifying tags (with static values, or other tag values)
+# - Removing tags
+#
+# Limitations:
+# - Data must be a tag on the span at time of the snapshot
+# - No arbitrary interpolation (tokens only)
+#
+meta:
+  format: 0.1
+  id: 'default'
+  version: '20230515'
+tracing:
+  spans:
+    grandparent:
+      sources:
+        start: 'grandparent.start'
+        finish: 'grandparent.finish'
+      attributes:
+        resource: '<finish:resource>'
+        service: '<finish:service>'
+      tags:
+        component: 'grandparent'
+        action: '<finish:action>'
+      metrics:
+        count: '<finish:count>'
+    parent:
+      sources:
+        start: 'parent.start'
+        finish: 'parent.finish'
+      attributes:
+        resource: '<finish:resource>'
+        service: '<finish:service>'
+      tags:
+        component: 'parent'
+        action: '<finish:action>'
+      metrics:
+        count: '<finish:count>'
+    child:
+      sources:
+        start: 'child.start'
+        finish: 'child.finish'
+      attributes:
+        resource: '<finish:resource>'
+        service: '<finish:service>'
+      tags:
+        component: 'child'
+        action: '<finish:action>'
+      metrics:
+        count: '<finish:count>'
