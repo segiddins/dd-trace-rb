@@ -11,6 +11,9 @@ class BasicController < ApplicationController
   #        ----- Redis ----                 -- Redis --
   #
   def default
+    # Make an HTTP request
+    Net::HTTP.get('datadoghq.com', '/product/apm/')
+
     # Read from the database
     records = Test.where(version: 0)
 

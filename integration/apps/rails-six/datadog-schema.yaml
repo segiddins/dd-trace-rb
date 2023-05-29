@@ -43,6 +43,26 @@ tracing:
         rails.route.action: '<finish:rails.route.action>'
         rails.route.controller: '<finish:rails.route.controller>'
       metrics:
+    http.request:
+      sources:
+        start: 'http.request.start'
+        finish: 'http.request.finish'
+      attributes:
+        resource: '<finish:http.method> <finish:http.url>'
+        service: '<finish:service>'
+        type: 'http'
+      tags:
+        component: 'net/http'
+        http.method: '<finish:http.method>'
+        http.url: '<finish:http.url>'
+        operation: 'request'
+        out.host: '<finish:out.host>'
+        peer.hostname: '<finish:peer.hostname>'
+        peer.service: '<finish:peer.service>'
+        span.kind: 'client'
+      metrics:
+        http.status_code: '<finish:http.status_code>'
+        out.port: '<finish:out.port>'
     mysql2.query:
       # NOTE: Start is different than finish
       #       because span name changes.

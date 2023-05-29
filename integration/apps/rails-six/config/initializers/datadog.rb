@@ -16,6 +16,7 @@ Datadog.configure do |c|
     c.tracing.instrument :rails
     c.tracing.instrument :redis, service_name: 'acme-redis'
     c.tracing.instrument :resque
+    c.tracing.instrument :http
   end
 
   if Datadog::DemoEnv.feature?('appsec')
