@@ -7,10 +7,8 @@ require_relative '../action_view/integration'
 require_relative '../active_record/integration'
 require_relative '../active_support/integration'
 require_relative '../grape/endpoint'
-require_relative '../lograge/integration'
 require_relative 'ext'
 require_relative 'utils'
-require_relative '../semantic_logger/integration'
 
 module Datadog
   module Tracing
@@ -52,8 +50,6 @@ module Datadog
               activate_action_view!(datadog_config, rails_config)
               activate_active_job!(datadog_config, rails_config)
               activate_active_record!(datadog_config, rails_config)
-              activate_lograge!(datadog_config, rails_config)
-              activate_semantic_logger!(datadog_config, rails_config)
             end
           end
 
@@ -120,26 +116,6 @@ module Datadog
             return unless defined?(::ActiveRecord)
 
             datadog_config.tracing.instrument(:active_record)
-          end
-
-          def self.activate_lograge!(datadog_config, rails_config)
-            return unless defined?(::Lograge)
-
-            if datadog_config.tracing.log_injection
-              datadog_config.tracing.instrument(
-                :lograge
-              )
-            end
-          end
-
-          def self.activate_semantic_logger!(datadog_config, rails_config)
-            return unless defined?(::SemanticLogger)
-
-            if datadog_config.tracing.log_injection
-              datadog_config.tracing.instrument(
-                :semantic_logger
-              )
-            end
           end
         end
       end

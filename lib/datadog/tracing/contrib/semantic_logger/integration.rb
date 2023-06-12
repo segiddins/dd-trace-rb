@@ -30,18 +30,30 @@ module Datadog
             super && version >= MINIMUM_VERSION
           end
 
-          # TODO: abstract out the log injection related instrumentation into it's own module so we dont
-          # keep having to do these workarounds
-          def auto_instrument?
-            false
-          end
-
           def new_configuration
             Configuration::Settings.new
           end
 
           def patcher
             Patcher
+          end
+
+          def patch
+            log_injection_enabled = Datadog.configuration.tracing.log_injection
+
+            if !self.class.patchable? || !log_injection_enabled
+              return {
+                name: self.class.name,
+                available: self.class.available?,
+                loaded: self.class.loaded?,
+                compatible: self.class.compatible?,
+                patchable: self.class.patchable?,
+                configured_enabled: log_injection_enabled
+              }
+            end
+
+            patcher.patch
+            true
           end
         end
       end

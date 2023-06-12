@@ -27,19 +27,30 @@ module Datadog
             super && version >= MINIMUM_VERSION
           end
 
-          # enabled by rails integration and has a hard dependancy on rails
-          # so can safely say this shouldn't ever be part of auto instrumentation
-          # https://github.com/roidrage/lograge/blob/1729eab7956bb95c5992e4adab251e4f93ff9280/lograge.gemspec#L18-L20
-          def auto_instrument?
-            false
-          end
-
           def new_configuration
             Configuration::Settings.new
           end
 
           def patcher
             Patcher
+          end
+
+          def patch
+            log_injection_enabled = Datadog.configuration.tracing.log_injection
+
+            if !self.class.patchable? || !log_injection_enabled
+              return {
+                name: self.class.name,
+                available: self.class.available?,
+                loaded: self.class.loaded?,
+                compatible: self.class.compatible?,
+                patchable: self.class.patchable?,
+                configured_enabled: log_injection_enabled
+              }
+            end
+
+            patcher.patch
+            true
           end
         end
       end
