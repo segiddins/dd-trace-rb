@@ -24,7 +24,7 @@ RSpec.describe 'Datadog::Tracing::Contrib::AutoInstrument' do
     it 'configurations application correctly' do
       expect_in_fork do
         app
-
+        expect(1).to eq(2)
         expect(config[:template_base_path]).to eq('views/')
       end
     end
