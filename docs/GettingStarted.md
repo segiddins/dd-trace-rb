@@ -60,9 +60,11 @@ To contribute, check out the [contribution guidelines][contribution docs] and [d
      - [httpclient](#httpclient)
      - [httpx](#httpx)
      - [Kafka](#kafka)
+     - [Minitest](#minitest)
      - [MongoDB](#mongodb)
      - [MySQL2](#mysql2)
      - [Net/HTTP](#nethttp)
+     - [OpenSearch](#opensearch)
      - [Postgres](#postgres)
      - [Presto](#presto)
      - [Qless](#qless)
@@ -120,7 +122,8 @@ To contribute, check out the [contribution guidelines][contribution docs] and [d
 
 | Type  | Documentation              | Version | Support type                         | Gem version support |
 | ----- | -------------------------- | -----   | ------------------------------------ | ------------------- |
-| MRI   | https://www.ruby-lang.org/ | 3.1     | Full                                 | Latest              |
+| MRI   | https://www.ruby-lang.org/ | 3.2     | Full                                 | Latest              |
+|       |                            | 3.1     | Full                                 | Latest              |
 |       |                            | 3.0     | Full                                 | Latest              |
 |       |                            | 2.7     | Full                                 | Latest              |
 |       |                            | 2.6     | Full                                 | Latest              |
@@ -180,35 +183,35 @@ Before installing `ddtrace`, [install the Datadog Agent](https://docs.datadoghq.
 
 Then configure the Datadog Agent to accept traces. To do this, either:
 
- - Set `DD_APM_ENABLED=true` in the agent's environment
+ - Set `DD_APM_ENABLED=true` in the Agent's environment
 
 OR
 
- - Add `apm_enabled: true` to the [agent's configuration file](https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6v7#agent-main-configuration-file)
+ - Add `apm_enabled: true` to the [Agent's configuration file](https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6v7#agent-main-configuration-file)
 
 *Additionally, in containerized environments...*
 
- - Set `DD_APM_NON_LOCAL_TRAFFIC=true` in the agent's environment
+ - Set `DD_APM_NON_LOCAL_TRAFFIC=true` in the Agent's environment
 
 OR
 
- - Add `apm_non_local_traffic: true` to the [agent's configuration file](https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6v7#agent-main-configuration-file).
+ - Add `apm_non_local_traffic: true` to the [Agent's configuration file](https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6v7#agent-main-configuration-file).
 
 See the specific setup instructions for [Docker](https://docs.datadoghq.com/agent/docker/apm/?tab=ruby), [Kubernetes](https://docs.datadoghq.com/agent/kubernetes/apm/?tab=helm), [Amazon ECS](https://docs.datadoghq.com/agent/amazon_ecs/apm/?tab=ruby) or [Fargate](https://docs.datadoghq.com/integrations/ecs_fargate/#trace-collection) to ensure that the Agent is configured to receive traces in a containerized environment.
 
 #### Configuring trace data ingestion
 
-The Datadog agent will listen for traces via HTTP on port `8126` by default.
+The Datadog Agent will listen for traces via HTTP on port `8126` by default.
 
-You may change the protocol or port the agent listens for trace data using the following:
+You may change the protocol or port the Agent listens for trace data using the following:
 
 **For HTTP over TCP**:
 
- - Set `DD_APM_RECEIVER_PORT=<port>` in the agent's environment
+ - Set `DD_APM_RECEIVER_PORT=<port>` in the Agent's environment
 
 OR
 
- - Add `apm_config: receiver_port: <port>` to the [agent's configuration file](https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6v7#agent-main-configuration-file)
+ - Add `apm_config: receiver_port: <port>` to the [Agent's configuration file](https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6v7#agent-main-configuration-file)
 
  **For Unix Domain Socket (UDS)**:
 
@@ -216,7 +219,7 @@ OR
 
 OR
 
- - Add `apm_config: receiver_socket: <path-to-socket-file>` to the [agent's configuration file](https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6v7#agent-main-configuration-file)
+ - Add `apm_config: receiver_socket: <path-to-socket-file>` to the [Agent's configuration file](https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6v7#agent-main-configuration-file)
 
 ### Instrument your application
 
@@ -323,11 +326,11 @@ If your application does not use the supported gems (Rails or Hanami) above, you
 
 #### Configuring OpenTelemetry
 
-You can send OpenTelemetry traces directly to the Datadog agent (without `ddtrace`) by using OTLP. Check out our documentation on [OTLP ingest in the Datadog Agent](https://docs.datadoghq.com/tracing/setup_overview/open_standards/#otlp-ingest-in-datadog-agent) for details.
+You can send OpenTelemetry traces directly to the Datadog Agent (without `ddtrace`) by using OTLP. Check out our documentation on [OTLP ingest in the Datadog Agent](https://docs.datadoghq.com/tracing/setup_overview/open_standards/#otlp-ingest-in-datadog-agent) for details.
 
 ### Connect your application to the Datadog Agent
 
-By default, `ddtrace` will connect to the agent using the first available settings in the listed priority:
+By default, `ddtrace` will connect to the Agent using the first available settings in the listed priority:
 
 1. Via any explicitly provided configuration settings (hostname/port/transport)
 2. Via Unix Domain Socket (UDS) located at `/var/run/datadog/apm.socket`
@@ -335,10 +338,10 @@ By default, `ddtrace` will connect to the agent using the first available settin
 
 If your Datadog Agent is listening at any of these locations, no further configuration should be required.
 
-If your agent runs on a different host or container than your application, or you would like to send traces via a different protocol, you will need to configure your application accordingly.
+If your Agent runs on a different host or container than your application, or you would like to send traces via a different protocol, you will need to configure your application accordingly.
 
-  - [How to send trace data via HTTP over TCP to agent](#changing-default-agent-hostname-and-port)
-  - [How to send trace data via Unix Domain Socket (UDS) to agent](#using-the-unix-domain-socket-uds-adapter)
+  - [How to send trace data via HTTP over TCP to Agent](#changing-default-agent-hostname-and-port)
+  - [How to send trace data via Unix Domain Socket (UDS) to Agent](#using-the-unix-domain-socket-uds-adapter)
 
 ### Final steps for installation
 
@@ -481,7 +484,7 @@ For a list of available integrations, and their configuration options, please re
 | Action Mailer              | `action_mailer`            | `>= 5.0`                 | `>= 5.0`                  | *[Link](#action-mailer)*            | *[Link](https://github.com/rails/rails/tree/master/actionmailer)*              |
 | Action Pack                | `action_pack`              | `>= 3.2`                 | `>= 3.2`                  | *[Link](#action-pack)*              | *[Link](https://github.com/rails/rails/tree/master/actionpack)*                |
 | Action View                | `action_view`              | `>= 3.2`                 | `>= 3.2`                  | *[Link](#action-view)*              | *[Link](https://github.com/rails/rails/tree/master/actionview)*                |
-| Active Job                 | `active_job`               | `>= 4.2`                 | `>= 4.2`                  | *[Link](#active-job)*               | *[Link](https://github.com/rails/rails/tree/master/activejob)*             |
+| Active Job                 | `active_job`               | `>= 4.2`                 | `>= 4.2`                  | *[Link](#active-job)*               | *[Link](https://github.com/rails/rails/tree/master/activejob)*                 |
 | Active Model Serializers   | `active_model_serializers` | `>= 0.9`                 | `>= 0.9`                  | *[Link](#active-model-serializers)* | *[Link](https://github.com/rails-api/active_model_serializers)*                |
 | Active Record              | `active_record`            | `>= 3.2`                 | `>= 3.2`                  | *[Link](#active-record)*            | *[Link](https://github.com/rails/rails/tree/master/activerecord)*              |
 | Active Support             | `active_support`           | `>= 3.2`                 | `>= 3.2`                  | *[Link](#active-support)*           | *[Link](https://github.com/rails/rails/tree/master/activesupport)*             |
@@ -498,14 +501,15 @@ For a list of available integrations, and their configuration options, please re
 | gRPC                       | `grpc`                     | `>= 1.7`                 | *gem not available*       | *[Link](#grpc)*                     | *[Link](https://github.com/grpc/grpc/tree/master/src/rubyc)*                   |
 | hanami                     | `hanami`                   | `>= 1`, `< 2`            | `>= 1`, `< 2`             | *[Link](#hanami)*                   | *[Link](https://github.com/hanami/hanami)*                                     |
 | http.rb                    | `httprb`                   | `>= 2.0`                 | `>= 2.0`                  | *[Link](#httprb)*                   | *[Link](https://github.com/httprb/http)*                                       |
-| httpclient                 | `httpclient`               | `>= 2.2`                 | `>= 2.2`                  | *[Link](#httpclient)*               | *[Link](https://github.com/nahi/httpclient)*                                     |
+| httpclient                 | `httpclient`               | `>= 2.2`                 | `>= 2.2`                  | *[Link](#httpclient)*               | *[Link](https://github.com/nahi/httpclient)*                                   |
 | httpx                      | `httpx`                    | `>= 0.11`                | `>= 0.11`                 | *[Link](#httpx)*                    | *[Link](https://gitlab.com/honeyryderchuck/httpx)*                             |
 | Kafka                      | `ruby-kafka`               | `>= 0.7.10`              | `>= 0.7.10`               | *[Link](#kafka)*                    | *[Link](https://github.com/zendesk/ruby-kafka)*                                |
 | Makara (via Active Record) | `makara`                   | `>= 0.3.5`               | `>= 0.3.5`                | *[Link](#active-record)*            | *[Link](https://github.com/instacart/makara)*                                  |
 | MongoDB                    | `mongo`                    | `>= 2.1`                 | `>= 2.1`                  | *[Link](#mongodb)*                  | *[Link](https://github.com/mongodb/mongo-ruby-driver)*                         |
 | MySQL2                     | `mysql2`                   | `>= 0.3.21`              | *gem not available*       | *[Link](#mysql2)*                   | *[Link](https://github.com/brianmario/mysql2)*                                 |
 | Net/HTTP                   | `http`                     | *(Any supported Ruby)*   | *(Any supported Ruby)*    | *[Link](#nethttp)*                  | *[Link](https://ruby-doc.org/stdlib-2.4.0/libdoc/net/http/rdoc/Net/HTTP.html)* |
-| Postgres                     | `pg`                   | `>= 0.18.4`              | *gem not available*       | *[Link](#postgres)*                   | *[Link](https://github.com/ged/ruby-pg)*                  |
+| OpenSearch                 | `opensearch-ruby`          | `>= 1.0.0`               | `>= 1.0.0`                | *[Link](#opensearch)*               | *[Link](https://github.com/opensearch-project/opensearch-ruby)*                |
+| Postgres                   | `pg`                       | `>= 0.18.4`              | *gem not available*       | *[Link](#postgres)*                   | *[Link](https://github.com/ged/ruby-pg)*                                       |
 | Presto                     | `presto`                   | `>= 0.5.14`              | `>= 0.5.14`               | *[Link](#presto)*                   | *[Link](https://github.com/treasure-data/presto-client-ruby)*                  |
 | Qless                      | `qless`                    | `>= 0.10.0`              | `>= 0.10.0`               | *[Link](#qless)*                    | *[Link](https://github.com/seomoz/qless)*                                      |
 | Que                        | `que`                      | `>= 1.0.0.beta2`         | `>= 1.0.0.beta2`          | *[Link](#que)*                      | *[Link](https://github.com/que-rb/que)*                                        |
@@ -1285,6 +1289,30 @@ Datadog.configure do |c|
 end
 ```
 
+### Minitest
+
+The Minitest integration will trace all executions of tests when using `minitest` test framework.
+
+To activate your integration, use the `Datadog.configure` method:
+
+```ruby
+require 'minitest'
+require 'ddtrace'
+
+# Configure default Minitest integration
+Datadog.configure do |c|
+  c.ci.instrument :minitest, **options
+end
+```
+
+`options` are the following keyword arguments:
+
+| Key | Description | Default |
+| --- | ----------- | ------- |
+| `enabled` | Defines whether Minitest tests should be traced. Useful for temporarily disabling tracing. `true` or `false` | `true` |
+| `service_name` | Service name used for `minitest` instrumentation. | `'minitest'` |
+| `operation_name` | Operation name used for `minitest` instrumentation. Useful if you want rename automatic trace metrics e.g. `trace.#{operation_name}.errors`. | `'minitest.test'` |
+
 ### MongoDB
 
 The integration traces any `Command` that is sent from the [MongoDB Ruby Driver](https://github.com/mongodb/mongo-ruby-driver) to a MongoDB cluster. By extension, Object Document Mappers (ODM) such as Mongoid are automatically instrumented if they use the official Ruby driver. To activate the integration, simply:
@@ -1408,6 +1436,35 @@ If you wish to configure each connection object individually, you may use the `D
 client = Net::HTTP.new(host, port)
 Datadog.configure_onto(client, **options)
 ```
+
+### OpenSearch
+
+The OpenSearch integration will trace any call to `perform_request` in the `Client` object:
+
+```ruby
+require 'opensearch'
+require 'ddtrace'
+
+Datadog.configure do |c|
+  c.tracing.instrument :opensearch, **options
+end
+
+# Perform a query to OpenSearch
+client = OpenSearch::Client.new(
+  host: 'https://localhost:9200',
+  user: 'user',
+  password: 'password',
+)
+client.cluster.health
+```
+
+`options` are the following keyword arguments:
+
+| Key | Description | Default |
+| --- | ----------- | ------- |
+| `quantize` | Hash containing options for quantization. May include `:show` with an Array of keys to not quantize (or `:all` to skip quantization), or `:exclude` with Array of keys to exclude entirely. | `{}` |
+| `service_name` | Service name used for `opensearch` instrumentation | `'opensearch'` |
+
 ### Postgres
 
 The PG integration traces SQL commands sent through the `pg` gem via:
@@ -1658,7 +1715,7 @@ end
 |  2.4          |                |  4.2.8 - 5.2   |
 |  2.5          |                |  4.2.8 - 6.1   |
 |  2.6 - 2.7    |  9.2           |  5.0 - 6.1     |
-|  3.0          |                |  6.1           |
+|  3.0 - 3.2    |                |  6.1           |
 
 ### Rake
 
@@ -2135,25 +2192,32 @@ LogJob.perform_async('login')
 
 ## Additional configuration
 
-To change the default behavior of Datadog tracing, you can set environment variables, or provide custom options inside a `Datadog.configure` block, e.g.:
+To change the default behavior of `ddtrace`, you can use, in order of priority, with 1 being the highest:
 
-```ruby
-Datadog.configure do |c|
-  c.service = 'billing-api'
-  c.env = ENV['RACK_ENV']
+1. [Remote Configuration](https://docs.datadoghq.com/agent/remote_config).
+2. Options set inside a `Datadog.configure` block, e.g.:
+    ```ruby
+    Datadog.configure do |c|
+      c.service = 'billing-api'
+      c.env = ENV['RACK_ENV']
+    
+      c.tracing.report_hostname = true
+      c.tracing.test_mode.enabled = (ENV['RACK_ENV'] == 'test')
+    end
+    ```
+3. Environment variables.
 
-  c.tracing.report_hostname = true
-  c.tracing.test_mode.enabled = (ENV['RACK_ENV'] == 'test')
-end
-```
+**If a higher priority value is set for an option, setting that option with a lower priority value will not change its effective value.**
+
+For example, if `tracing.sampling.default_rate` is configured by [Remote Configuration](#remote-configuration), changing its value through the `Datadog.configure` block will have no effect.
 
 **Available configuration options:**
 
 | Setting                                                 | Env Var                        | Default                                                           | Description                                                                                                                                                                                                                               |
 |---------------------------------------------------------|--------------------------------|-------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **Global**                                              |                                |                                                                   |                                                                                                                                                                                                                                           |
-| `agent.host`                                            | `DD_AGENT_HOST`                | `127.0.0.1`                                                       | Hostname of agent to where trace data will be sent.                                                                                                                                                                                       |
-| `agent.port`                                            | `DD_TRACE_AGENT_PORT`          | `8126`                                                            | Port of agent host to where trace data will be sent. If the [Agent configuration](#configuring-trace-data-ingestion) sets `receiver_port` or `DD_APM_RECEIVER_PORT` to something other than the default `8126`, then `DD_TRACE_AGENT_PORT` or `DD_TRACE_AGENT_URL` must match it.         |
+| `agent.host`                                            | `DD_AGENT_HOST`                | `127.0.0.1`                                                       | Hostname of Agent to where trace data will be sent.                                                                                                                                                                                       |
+| `agent.port`                                            | `DD_TRACE_AGENT_PORT`          | `8126`                                                            | Port of Agent host to where trace data will be sent. If the [Agent configuration](#configuring-trace-data-ingestion) sets `receiver_port` or `DD_APM_RECEIVER_PORT` to something other than the default `8126`, then `DD_TRACE_AGENT_PORT` or `DD_TRACE_AGENT_URL` must match it.         |
 |                                                         | `DD_TRACE_AGENT_URL`           | `nil`                                                             | Sets the URL endpoint where traces are sent. Has priority over `agent.host` and `agent.port`. If the [Agent configuration](#configuring-trace-data-ingestion) sets `receiver_port` or `DD_APM_RECEIVER_PORT` to something other than the default `8126`, then `DD_TRACE_AGENT_PORT` or `DD_TRACE_AGENT_URL` must match it.                |
 | `diagnostics.debug`                                     | `DD_TRACE_DEBUG`               | `false`                                                           | Enables or disables debug mode. Prints verbose logs. **NOT recommended for production or other sensitive environments.** See [Debugging and diagnostics](#debugging-and-diagnostics) for more details.                                    |
 | `diagnostics.startup_logs.enabled`                      | `DD_TRACE_STARTUP_LOGS`        | `nil`                                                             | Prints startup configuration and diagnostics to log. For assessing state of tracing at application startup. See [Debugging and diagnostics](#debugging-and-diagnostics) for more details.                                                 |
@@ -2176,6 +2240,7 @@ end
 | `tracing.sampler`                                       |                                | `nil`                                                             | Advanced usage only. Sets a custom `Datadog::Tracing::Sampling::Sampler` instance. If provided, the tracer will use this sampler to determine sampling behavior. See [Application-side sampling](#application-side-sampling) for details. |
 | `tracing.sampling.default_rate`                         | `DD_TRACE_SAMPLE_RATE`         | `nil`                                                             | Sets the trace sampling rate between `0.0` (0%) and `1.0` (100%). See [Application-side sampling](#application-side-sampling) for details.                                                                                                  |
 | `tracing.sampling.rate_limit`                           | `DD_TRACE_RATE_LIMIT`          | `100` (per second)                                                | Sets a maximum number of traces per second to sample. Set a rate limit to avoid the ingestion volume overages in the case of traffic spikes.                                                                    |
+| `tracing.sampling.rules`                                | `DD_TRACE_SAMPLING_RULES`      | `nil`                                                             | Sets trace-level sampling rules, matching against the local root span. The format is a `String` with JSON, containing an Array of Objects. Each Object must have a float attribute `sample_rate` (between 0.0 and 1.0, inclusive), and optionally `name` and `service` string attributes. `name` and `service` control to which traces this sampling rule applies; if both are absent, then this rule applies to all traces. Rules are evaluted in order of declartion in the array; only the first to match is applied. If none apply, then `tracing.sampling.default_rate` is applied. |
 | `tracing.sampling.span_rules`                           | `DD_SPAN_SAMPLING_RULES`,`ENV_SPAN_SAMPLING_RULES_FILE` | `nil`                                    | Sets [Single Span Sampling](#single-span-sampling) rules. These rules allow you to keep spans even when their respective traces are dropped.                                                                                              |
 | `tracing.trace_id_128_bit_generation_enabled` | `DD_TRACE_128_BIT_TRACEID_GENERATION_ENABLED` | `false` | `true` to generate 128 bits trace ID and `false` to generate 64 bits trace ID  |
 | `tracing.report_hostname`                               | `DD_TRACE_REPORT_HOSTNAME`     | `false`                                                           | Adds hostname tag to traces.                                                                                                                                                                                                              |
@@ -2202,7 +2267,7 @@ Datadog.logger.info { "this is typically called by tracing code" }
 
 #### Environment and tags
 
-By default, the trace agent (not this library, but the program running in the background collecting data from various clients) uses the tags set in the agent config file. You can configure the application to automatically tag your traces and metrics, using the following environment variables:
+By default, the trace Agent (not this library, but the program running in the background collecting data from various clients) uses the tags set in the Agent config file. You can configure the application to automatically tag your traces and metrics, using the following environment variables:
 
  - `DD_ENV`: Your application environment (e.g. `production`, `staging`, etc.)
  - `DD_SERVICE`: Your application's default service name (e.g. `billing-api`)
@@ -2232,7 +2297,7 @@ There are two different suggested means of producing diagnostics for tracing:
 
 ##### Enabling debug mode
 
-Switching the library into debug mode will produce verbose, detailed logs about tracing activity, including any suppressed errors. This output can be helpful in identifying errors, or confirming trace output to the agent.
+Switching the library into debug mode will produce verbose, detailed logs about tracing activity, including any suppressed errors. This output can be helpful in identifying errors, or confirming trace output to the Agent.
 
 You can enable this via `diagnostics.debug = true` or `DD_TRACE_DEBUG`.
 
@@ -2314,7 +2379,7 @@ To configure it, see the [Ingestion Mechanisms documentation](https://docs.datad
 
 #### Application-side sampling
 
-While the Datadog agent can sample traces to reduce bandwidth usage, application-side sampling reduces the performance overhead in the host application.
+While the Datadog Agent can sample traces to reduce bandwidth usage, application-side sampling reduces the performance overhead in the host application.
 
 **Application-side sampling drops traces as early as possible. This causes the [Ingestion Controls](https://docs.datadoghq.com/tracing/trace_pipeline/ingestion_controls/) page to not receive enough information to report accurate sampling rates. Use only when reducing the tracing overhead is paramount.**
 
@@ -2645,17 +2710,17 @@ Datadog::Tracing.trace('my.operation') { logger.warn('This is a traced operation
 
 ### Configuring the transport layer
 
-By default, `ddtrace` will connect to the agent using the first available settings in the listed priority:
+By default, `ddtrace` will connect to the Agent using the first available settings in the listed priority:
 
-1. Via any explicitly provided configuration settings (hostname/port/transport)
-2. Via Unix Domain Socket (UDS) located at `/var/run/datadog/apm.socket`
-3. Via HTTP over TCP to `127.0.0.1:8126`
+1. Through any explicitly provided configuration settings (hostname/port/transport)
+2. Through Unix Domain Socket (UDS) located at `/var/run/datadog/apm.socket`
+3. Through HTTP over TCP to `127.0.0.1:8126`
 
 However, the tracer can be configured to send its trace data to alternative destinations, or by alternative protocols.
 
-#### Changing default agent hostname and port
+#### Changing default Agent hostname and port
 
-To change the agent host or port, provide `DD_AGENT_HOST` and `DD_TRACE_AGENT_PORT`.
+To change the Agent host or port, provide `DD_AGENT_HOST` and `DD_TRACE_AGENT_PORT`.
 
 OR within a `Datadog.configure` block, provide the following settings:
 
@@ -2685,12 +2750,12 @@ end
 
 The `UnixSocket` adapter submits traces using `Net::HTTP` over Unix socket.
 
-To use, first configure your trace agent to listen by Unix socket, then configure the tracer with:
+To use, first configure your trace Agent to listen by Unix socket, then configure the tracer with:
 
 ```ruby
 Datadog.configure do |c|
   c.tracing.transport_options = proc { |t|
-    # Provide local path to trace agent Unix socket
+    # Provide local path to trace Agent Unix socket
     t.adapter :unix, '/tmp/ddagent/trace.sock'
   }
 end
@@ -2750,7 +2815,7 @@ The tracer and its integrations can produce some additional metrics that can pro
 
 To configure your application for metrics collection:
 
-1. [Configure your Datadog agent for StatsD](https://docs.datadoghq.com/developers/dogstatsd/#setup)
+1. [Configure your Datadog Agent for StatsD](https://docs.datadoghq.com/developers/dogstatsd/#setup)
 2. Add `gem 'dogstatsd-ruby', '~> 5.3'` to your Gemfile
 
 #### For application runtime
@@ -2771,7 +2836,7 @@ Datadog.configure do |c|
 
   # Optionally, you can configure the Statsd instance used for sending runtime metrics.
   # Statsd is automatically configured with default settings if `dogstatsd-ruby` is available.
-  # You can configure with host and port of Datadog agent; defaults to 'localhost:8125'.
+  # You can configure with host and port of Datadog Agent; defaults to 'localhost:8125'.
   c.runtime_metrics.statsd = Datadog::Statsd.new
 end
 ```
@@ -2780,15 +2845,17 @@ See the [Dogstatsd documentation](https://www.rubydoc.info/github/DataDog/dogsta
 
 The stats are VM specific and will include:
 
-| Name                        | Type    | Description                                              | Available on |
-| --------------------------  | ------- | -------------------------------------------------------- | ------------ |
-| `runtime.ruby.class_count`  | `gauge` | Number of classes in memory space.                       | CRuby        |
-| `runtime.ruby.gc.*`         | `gauge` | Garbage collection statistics: collected from `GC.stat`. | All runtimes |
-| `runtime.ruby.thread_count` | `gauge` | Number of threads.                                       | All runtimes |
+| Name                        | Type    | Description                                                   | Available on       |
+| --------------------------  | ------- | ------------------------------------------------------------- | ------------------ |
+| `runtime.ruby.class_count`  | `gauge` | Number of classes in memory space.                            | CRuby              |
+| `runtime.ruby.gc.*`         | `gauge` | Garbage collection statistics: collected from `GC.stat`.      | All runtimes       |
+| `runtime.ruby.yjit.*`       | `gauge` | YJIT statistics collected from `RubyVM::YJIT.runtime_stats`.  | CRuby (if enabled) |
+| `runtime.ruby.thread_count` | `gauge` | Number of threads.                                            | All runtimes       |
 | `runtime.ruby.global_constant_state`        | `gauge` | Global constant cache generation.                                                                     | CRuby ≤ 3.1                                                                                     |
 | `runtime.ruby.global_method_state`          | `gauge` | [Global method cache generation.](https://tenderlovemaking.com/2015/12/23/inline-caching-in-mri.html) | [CRuby 2.x](https://docs.ruby-lang.org/en/3.0.0/NEWS_md.html#label-Implementation+improvements) |
 | `runtime.ruby.constant_cache_invalidations` | `gauge` | Constant cache invalidations.                                                                         | CRuby ≥ 3.2                                                                                     |
 | `runtime.ruby.constant_cache_misses`        | `gauge` | Constant cache misses.                                                                                | CRuby ≥ 3.2                                                                                     |
+
 
 In addition, all metrics include the following tags:
 

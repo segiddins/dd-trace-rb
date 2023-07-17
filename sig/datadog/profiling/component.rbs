@@ -12,6 +12,7 @@ module Datadog
       def self.build_profiler_exporter: (
         untyped settings,
         (Datadog::Profiling::StackRecorder | Datadog::Profiling::OldRecorder) recorder,
+        no_signals_workaround_enabled: bool,
       ) -> Datadog::Profiling::Exporter
 
       def self.build_profiler_oldstack_collector: (
@@ -34,6 +35,8 @@ module Datadog
       def self.no_signals_workaround_enabled?: (untyped settings) -> bool
 
       def self.incompatible_libmysqlclient_version?: (untyped settings) -> bool
+
+      def self.load_pprof_support: () -> void
     end
   end
 end
