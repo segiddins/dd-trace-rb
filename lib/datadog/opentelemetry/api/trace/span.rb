@@ -7,20 +7,30 @@ module Datadog
       module Span
         attr_accessor :datadog_trace, :datadog_span
 
-        # def set_attribute(key, value)
-        #   @mutex.synchronize do
-        #     if @ended
-        #       OpenTelemetry.logger.warn('Calling set_attribute on an ended Span.')
-        #     else
-        #       @attributes ||= {}
-        #       @attributes[key] = value
-        #       trim_span_attributes(@attributes)
-        #       @total_recorded_attributes += 1
-        #     end
-        #   end
-        #   self
-        # end
-        # alias []= set_attribute
+        def set_attribute(key, value)
+          res = super
+          # Attributes can get dropped or their values truncated by `super`
+          datadog_set_attribute(key)
+          res
+        end
+        alias []= set_attribute
+
+        def add_attributes(attributes)
+          res = super
+          # Attributes can get dropped or their values truncated by `super`
+          attributes.each { |key, _| datadog_set_attribute(key) }
+          res
+        end
+
+        private
+
+        def datadog_set_attribute(key)
+          if @attributes.key?(key)
+            datadog_span.set_tag(key, @attributes[key])
+          else
+            datadog_span.clear_tag(key)
+          end
+        end
 
         ::OpenTelemetry::Trace::Span.prepend(self)
       end
