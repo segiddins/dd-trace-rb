@@ -606,6 +606,26 @@ RSpec.describe Datadog::Core::Configuration::Option do
 
     shared_examples_for 'env coercion' do
       context 'when type is defined' do
+        context ':hash' do
+          let(:type) { :hash }
+
+          context 'value with commas' do
+            let(:env_value) { 'key1:value1,key2:value2' }
+
+            it 'coerce value' do
+              expect(option.get).to eq({ 'key1' => 'value1', 'key2' => 'value2' })
+            end
+
+            context 'remove empty values' do
+              let(:env_value) { 'key1:value1,key2:value2,,,key3:value3,' }
+
+              it 'coerce value' do
+                expect(option.get).to eq({ 'key1' => 'value1', 'key2' => 'value2', 'key3' => 'value3' })
+              end
+            end
+          end
+        end
+
         context ':int' do
           let(:type) { :int }
           let(:env_value) { '1234' }
@@ -949,6 +969,25 @@ RSpec.describe Datadog::Core::Configuration::Option do
       it 'resets precedence to DEFAULT' do
         reset
         expect(option.send(:precedence_set)).to eq(Datadog::Core::Configuration::Option::Precedence::DEFAULT)
+      end
+
+      context 'with previous value in different precedence' do
+        before do
+          allow(context).to receive(:instance_exec).with(:value, any_args).and_return(:value)
+
+          option.set(:value, precedence: Datadog::Core::Configuration::Option::Precedence::PROGRAMMATIC)
+        end
+
+        it 'resetting removes all old precedence values store' do
+          reset
+
+          # For unset to try to restore an old precedence value
+          option.set(:value, precedence: Datadog::Core::Configuration::Option::Precedence::REMOTE_CONFIGURATION)
+          option.unset(Datadog::Core::Configuration::Option::Precedence::REMOTE_CONFIGURATION)
+
+          # But no values should be stored, thus the default is returned instead
+          expect(option.get).to eq(default)
+        end
       end
     end
   end
