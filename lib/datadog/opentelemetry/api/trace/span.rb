@@ -7,31 +7,6 @@ module Datadog
       module Span
         attr_accessor :datadog_trace, :datadog_span
 
-        def set_attribute(key, value)
-          res = super
-          # Attributes can get dropped or their values truncated by `super`
-          datadog_set_attribute(key)
-          res
-        end
-        alias []= set_attribute
-
-        def add_attributes(attributes)
-          res = super
-          # Attributes can get dropped or their values truncated by `super`
-          attributes.each { |key, _| datadog_set_attribute(key) }
-          res
-        end
-
-        private
-
-        def datadog_set_attribute(key)
-          if @attributes.key?(key)
-            datadog_span.set_tag(key, @attributes[key])
-          else
-            datadog_span.clear_tag(key)
-          end
-        end
-
         ::OpenTelemetry::Trace::Span.prepend(self)
       end
     end

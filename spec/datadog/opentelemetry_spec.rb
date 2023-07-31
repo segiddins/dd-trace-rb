@@ -148,6 +148,21 @@ RSpec.describe Datadog::OpenTelemetry do
       end
     end
 
+    describe '#set_attribute' do
+      let(:start_span) { otel_tracer.start_span('start-span') }
+      let(:active_span) { Datadog::Tracing.active_span }
+
+      it 'sets Datadog tag' do
+        start_span
+
+        expect { start_span.set_attribute('key', 'value') }.to change { active_span.get_tag('key') }.from(nil).to('value')
+
+        start_span.finish
+
+        expect(span.get_tag('key')).to eq('value')
+      end
+    end
+
     context 'OpenTelemetry.logger' do
       it 'is the Datadog logger' do
         expect(::OpenTelemetry.logger).to eq(::Datadog.logger)
