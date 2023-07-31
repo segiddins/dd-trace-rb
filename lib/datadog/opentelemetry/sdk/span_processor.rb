@@ -27,7 +27,7 @@ module Datadog
         #
         # @param [Span] span the {Span} that just ended.
         def on_finish(span)
-          span.datadog_span.finish
+          span.datadog_span.finish(Time.at(span.end_timestamp / 1000000000.0))
         end
 
         # Export all ended spans to the configured `Exporter` that have not yet
@@ -81,7 +81,7 @@ module Datadog
           kind = span.kind || 'internal'
           tags[Tracing::Metadata::Ext::TAG_KIND] = kind
 
-          datadog_span = Tracing.trace(span.name, tags: tags, start_time: Time.at(span.start_timestamp/1000000000))
+          datadog_span = Tracing.trace(span.name, tags: tags, start_time: Time.at(span.start_timestamp / 1000000000.0))
           datadog_span.set_error([nil, span.status.description]) unless span.status.ok?
 
           datadog_span.set_tags(span.attributes)

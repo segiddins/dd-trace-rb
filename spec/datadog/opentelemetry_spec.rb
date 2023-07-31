@@ -54,9 +54,29 @@ RSpec.describe Datadog::OpenTelemetry do
 
         context 'with attributes' do
           let(:options) { {attributes: attributes} }
-          let(:attributes) { {} }
-          it do
-            raise 'implement me'
+
+          [
+            [false, 'false'],
+            ['str', 'str'],
+            [[false], '[false]'],
+            [['str'], '["str"]'],
+            [[1], '[1]'],
+          ].each do |input, expected|
+            context "with attribute value #{input}" do
+              let(:attributes) { { 'tag' => input } }
+
+              it "sets tag #{expected}" do
+                expect(span.get_tag('tag')).to eq(expected)
+              end
+            end
+          end
+
+          context "with a numeric attribute" do
+            let(:attributes) { { 'tag' => 1 } }
+
+            it "sets it as a metric" do
+              expect(span.get_metric('tag')).to eq(1)
+            end
           end
         end
 
