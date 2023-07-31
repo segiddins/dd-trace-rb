@@ -83,6 +83,9 @@ module Datadog
 
           datadog_span = Tracing.trace(span.name, tags: tags)
           datadog_span.set_error([nil, span.status.description]) unless span.status.ok?
+
+          datadog_span.set_tags(span.attributes)
+
           datadog_span
         end
       end

@@ -128,6 +128,12 @@ RSpec.describe Datadog::OpenTelemetry do
           expect(child.name).to eq('start-span')
         end
       end
+
+      context 'with attributes' do
+        it do
+          raise 'implement me'
+        end
+      end
     end
 
     describe '#start_root_span' do
