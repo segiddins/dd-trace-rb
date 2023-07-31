@@ -42,13 +42,30 @@ RSpec.describe Datadog::OpenTelemetry do
 
     describe '#in_span' do
       context 'without an active span' do
-        subject!(:in_span) { otel_tracer.in_span('test') {} }
+        subject!(:in_span) { otel_tracer.in_span('test', **options) {} }
+        let(:options) { {} }
 
         it 'records a finished span' do
           expect(span).to be_root_span
           expect(span.name).to eq('test')
           expect(span.resource).to eq('test')
           expect(span.service).to eq(tracer.default_service)
+        end
+
+        context 'with attributes' do
+          let(:options) { {attributes: attributes} }
+          let(:attributes) { {} }
+          it do
+            raise 'implement me'
+          end
+        end
+
+        context 'with start_timestamp' do
+          let(:options) { {start_timestamp: start_timestamp} }
+          let(:start_timestamp) { Time.utc(2023) }
+          it do
+            expect(span.start_time).to eq(start_timestamp)
+          end
         end
       end
 
@@ -126,12 +143,6 @@ RSpec.describe Datadog::OpenTelemetry do
         it 'sets parent to active span' do
           expect(parent.name).to eq('existing-active-span')
           expect(child.name).to eq('start-span')
-        end
-      end
-
-      context 'with attributes' do
-        it do
-          raise 'implement me'
         end
       end
     end
